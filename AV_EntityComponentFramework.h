@@ -9,11 +9,11 @@ class DLL_EXPORT_DEFINE EntityComponentFramework : public Entity
 {
 public :
 	//------------------------------------------------------------
-	void Constructor();
+	void ECF_Constructor( ActorModel *actor_model );
 	//------------------------------------------------------------
-	void Create();
-	void Release();
-	void Update();
+	void ECF_Create();
+	void ECF_Release();
+	void ECF_Update();
 	//------------------------------------------------------------
 };
 

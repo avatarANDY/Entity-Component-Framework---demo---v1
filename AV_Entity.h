@@ -11,37 +11,33 @@ struct DataComponent
 	Component *pComponent;
 };
 
-#define ECF_EntityList     AV_MemoryPoolDoublyLinkedListLock< Entity >
-#define ECF_ComponentList  AV_MemoryPoolDoublyLinkedListLock< DataComponent >
-#define ECF_Node           MPNode2
+#define ECF_EntityList     TDoublyList< Entity >
+#define ECF_ComponentList  TDoublyList< DataComponent >
+#define ECF_Node           TDNode
 
 #define ENTITY_LIST_NODE_MAX     32
 #define COMPONENT_LIST_NODE_MAX  32
+
+class ActorModel;
 
 //==========================================================================================================================================================
 class DLL_EXPORT_DEFINE Entity
 {
 public :
 	//------------------------------------------------------------
-	UINT     Type;
-	UINT     ID;
-	Entity  *pRootEntityNodeLink;
-	bool     bEnabled;
+	UINT        Type;
+	UINT        ID;
+	ActorModel *pActorModelLink;
+	Entity     *pRootEntityNodeLink;
+	bool        bEnabled;
 	//------------------------------
 	ECF_EntityList    EntityList;
 	ECF_ComponentList ComponentList;
 	//------------------------------------------------------------
-	Entity*      AddEntity( UINT entity_type, UINT entity_id, Entity *root_entity_node = NULL );
+	Entity*      AddEntity( ActorModel *actor_model, UINT entity_type, UINT entity_id, Entity *root_entity_node = NULL );
 	bool         DelEntity( UINT entity_id );
-	Entity*      FindEntity( UINT entity_id );
+	Entity*      GetEntity( UINT entity_id );
 	//------------------------------------------------------------
-	template < class CLASS_TYPE >
-	CLASS_TYPE*  NewComponent()
-	{
-		CLASS_TYPE *component = NULL;
-		MY_NEW( component, CLASS_TYPE );
-		return component;
-	}
 	template < class CLASS_TYPE >
 	CLASS_TYPE*  AddNewComponent( UINT component_id )
 	{
@@ -52,12 +48,12 @@ public :
 	}
 	bool         AddComponent( Component *component, UINT component_id );
 	bool         DelComponent( UINT component_id );
-	Component*   FindComponent( UINT component_id );
+	Component*   GetComponent( UINT component_id );
 	//------------------------------------------------------------
-	bool         SendMessage( Entity *entity, Component *source, UINT componend_id, UINT message_type, void *data );
-	bool         SendMessage( Component *source, UINT componend_id, UINT message_type, void *data );
+	bool         SendMessage( Entity *entity, void *source, UINT componend_id, UINT message_type, void *data );
+	bool         SendMessage( void *source, UINT componend_id, UINT message_type, void *data );
 	//------------------------------------------------------------
-	void         Constructor( UINT entity_type, UINT entity_id, Entity *parent_entity_node );
+	void         Constructor( ActorModel *actor_model, UINT entity_type, UINT entity_id, Entity *parent_entity_node );
 	void         Destructor();
 	//------------------------------
 	void         Create();

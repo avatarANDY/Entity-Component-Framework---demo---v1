@@ -3,15 +3,16 @@
 #include "AV_EntityComponentFramework.h"
 
 //==========================================================================================================================================================
-void Entity::Constructor( UINT entity_type, UINT entity_id, Entity *parent_entity_node )
+void Entity::Constructor( ActorModel *actor_model, UINT entity_type, UINT entity_id, Entity *parent_entity_node )
 {
 	Type = entity_type;
 	ID = entity_id;
+	pActorModelLink = actor_model;
 	pRootEntityNodeLink = parent_entity_node;
 	bEnabled = true;
 
-	EntityList.Create( ENTITY_LIST_NODE_MAX );
-	ComponentList.Create( COMPONENT_LIST_NODE_MAX );
+	EntityList.Create();// ENTITY_LIST_NODE_MAX );
+	ComponentList.Create();// COMPONENT_LIST_NODE_MAX );
 }
 
 void Entity::Destructor()
@@ -21,15 +22,15 @@ void Entity::Destructor()
 }
 
 //==========================================================================================================================================================
-Entity* Entity::AddEntity( UINT entity_type, UINT entity_id, Entity *root_entity_node )
+Entity* Entity::AddEntity( ActorModel *actor_model, UINT entity_type, UINT entity_id, Entity *root_entity_node )
 {
-	Entity *entity_node = EntityList.GetNode();
+	ECF_Node< Entity > *entity_node = (ECF_Node< Entity >*)EntityList.GetNode();
 	if( entity_node )
 	{
 		if( root_entity_node == NULL )
-			entity_node->Constructor( entity_type, entity_id, pRootEntityNodeLink );
+			entity_node->Constructor( actor_model, entity_type, entity_id, pRootEntityNodeLink );
 		else
-			entity_node->Constructor( entity_type, entity_id, root_entity_node );
+			entity_node->Constructor( actor_model, entity_type, entity_id, root_entity_node );
 		if( EntityList.Link( entity_node ) )
 			return entity_node;
 	}
@@ -85,7 +86,7 @@ static Entity* gRecursiveFindEntityWithID( ECF_EntityList *entity_list, UINT ent
 	return NULL;
 }
 
-Entity* Entity::FindEntity( UINT entity_id )
+Entity* Entity::GetEntity( UINT entity_id )
 {
 	if( entity_id == ID )
 		return this;
@@ -98,11 +99,11 @@ bool Entity::AddComponent( Component *component, UINT component_id )
 	if( component == NULL )
 		return false;
 
-	DataComponent *component_node = ComponentList.GetNode();
+	ECF_Node< DataComponent > *component_node = (ECF_Node< DataComponent >*)ComponentList.GetNode();
 	if( component_node )
 	{
+		component_node->ID = component_id;
 		component_node->pComponent = component;
-		component_node->pComponent->ID = component_id;
 		component->ID = component_id;
 		component->pParentEntityNodeLink = this;
 		if( ComponentList.Link( component_node ) )
@@ -175,7 +176,7 @@ static Component* gRecursiveFindComponentWithID( ECF_EntityList *entity_list, UI
 	return NULL;
 }
 
-Component* Entity::FindComponent( UINT component_id )
+Component* Entity::GetComponent( UINT component_id )
 {
 	Component *component = gFindComponent( &ComponentList, component_id );
 	if( component )
@@ -184,7 +185,7 @@ Component* Entity::FindComponent( UINT component_id )
 }
 
 //==========================================================================================================================================================
-bool Entity::SendMessage( Entity *entity, Component *source, UINT componend_id, UINT message_type, void *data )
+bool Entity::SendMessage( Entity *entity, void *source, UINT componend_id, UINT message_type, void *data )
 {
 	Component *component = gFindComponent( &entity->ComponentList, componend_id );
 	if( component )
@@ -204,9 +205,18 @@ bool Entity::SendMessage( Entity *entity, Component *source, UINT componend_id, 
 	return false;
 }
 
-bool Entity::SendMessage( Component *source, UINT componend_id, UINT message_type, void *data )
+bool Entity::SendMessage( void *source, UINT componend_id, UINT message_type, void *data )
 {
-	Component *component = gRecursiveFindComponentWithID( &pRootEntityNodeLink->EntityList, componend_id );
+	Component *component = gFindComponent( &pRootEntityNodeLink->ComponentList, componend_id );
+	if( component )
+	{
+		// get it.
+	}
+	else
+	{
+		component = gRecursiveFindComponentWithID( &pRootEntityNodeLink->EntityList, componend_id );
+	}
+
 	if( component )
 	{
 		component->vOnMessage( source, message_type, data );
@@ -312,7 +322,7 @@ static void gComponentUpdate( ECF_ComponentList *component_list )
 	{
 		component = component_node->pComponent;
 		if( component->bEnabled )
-			component->OnUpdate();
+			component->vOnUpdate();
 		component_node = component_node->pNext;
 	}
 }
