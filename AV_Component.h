@@ -2,7 +2,7 @@
 #ifndef __AV_ECF_COMPONENT_H
 #define __AV_ECF_COMPONENT_H
 
-#include "AV_MemoryPoolStructureLock.hpp"
+#include "AV_TMPDoublyList.hpp"
 
 #define DLL_EXPORT_DEFINE __declspec( dllexport )
 
@@ -13,10 +13,10 @@ class DLL_EXPORT_DEFINE Component
 {
 public :
 	//------------------------------------------------------------
-	UINT     Type;
-	UINT     ID;
-	Entity  *pParentEntityNodeLink;
-	bool     bEnabled;
+	UINT    Type;
+	UINT    ID;
+	Entity *pParentEntityNodeLink;
+	bool    bEnabled;
 	//------------------------------------------------------------
 	Component();
 	virtual ~Component(){}
@@ -24,9 +24,9 @@ public :
 	virtual void vOnCreate(){}
 	virtual void vOnRelease(){}
 	//------------------------------
-	virtual void OnUpdate(){}
+	virtual void vOnUpdate(){}
 	//------------------------------
-	virtual void vOnMessage( Component *source, UINT message_type, void *data ){}
+	virtual void vOnMessage( void *source, UINT message_type, void *data ){}
 	//------------------------------------------------------------
 };
 
