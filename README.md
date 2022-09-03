@@ -1,4 +1,4 @@
-這個 Entity Component Framework (ECF) v1 是一個 demo 展示板, 
+這個 Entity Component Framework (ECF) v2 是一個 demo 展示板, 
 主要是呈現我對於組件式框架的設計思想, 初步已應用在一個商用的 C++ Server 專案上, 以作為實務驗證.
 
 PS: 
